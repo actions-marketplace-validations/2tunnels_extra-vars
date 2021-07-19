@@ -1,11 +1,15 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Extra environment variables'
+description: 'Export extra environment variables for the following jobs'
+author: 'Vlad Dmitrievich'
 inputs:
-  milliseconds: # change this
+  token:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'Authentication token'
+    default: ${{ github.token }}
+  prefix:
+    required: true
+    description: 'Prefix for environment variables'
+    default: EXTRA
 runs:
   using: 'node12'
   main: 'dist/index.js'
