@@ -8,7 +8,7 @@ This action exports additional environment variables for the next steps after it
 
 ```yaml
 - name: Extra environment variables
-  uses: 2tunnels/extra-vars@v0.0.1
+  uses: 2tunnels/extra-vars@v1
 - name: Do something useful with exported variables
   run: >
     # Get details about pull request
