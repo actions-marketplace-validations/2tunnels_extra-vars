@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Running ${EXTRA_WORKFLOW} for ${EXTRA_REPO_OWNER}/${EXTRA_REPO_NAME}"
+
 if [[ -n "$EXTRA_PULL_REQUEST_NUMBER" ]]; then
     echo "Workflow was triggered by pull request: ${EXTRA_PULL_REQUEST_TITLE} (${EXTRA_PULL_REQUEST_NUMBER})"
 fi

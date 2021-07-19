@@ -1,5 +1,5 @@
 name: 'Extra environment variables'
-description: 'Export extra environment variables for the following steps'
+description: 'Exports additional environment variables for the next steps after it'
 author: 'Vlad Dmitrievich'
 inputs:
   token:
@@ -9,7 +9,10 @@ inputs:
   prefix:
     required: true
     description: 'Prefix for environment variables'
-    default: EXTRA
+    default: 'EXTRA'
 runs:
   using: 'node12'
   main: 'dist/index.js'
+branding:
+  icon: 'dollar-sign'
+  color: 'gray-dark'

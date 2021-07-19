@@ -119,7 +119,7 @@ async function run(): Promise<void> {
   exportVar(`${prefix}_REF`, github.context.ref);
   exportVar(`${prefix}_WORKFLOW`, github.context.workflow);
   exportVar(`${prefix}_REPO_OWNER`, github.context.repo.owner);
-  exportVar(`${prefix}_REPO_REPO`, github.context.repo.repo);
+  exportVar(`${prefix}_REPO_NAME`, github.context.repo.repo);
 
   if (github.context.payload.action !== undefined) {
     exportVar(`${prefix}_PAYLOAD_ACTION`, github.context.payload.action);
