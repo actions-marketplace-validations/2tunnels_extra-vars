@@ -40,7 +40,7 @@ const core = __importStar(__webpack_require__(186));
 const github = __importStar(__webpack_require__(438));
 function exportVar(name, val) {
     if (Array.isArray(val)) {
-        core.exportVariable(name, `${val.join('\n')}\n`);
+        core.exportVariable(name, val.join('\n'));
     }
     else {
         core.exportVariable(name, val.toString());
@@ -78,11 +78,53 @@ function exportPullRequestVariables(prefix, octokit) {
         const filesRenamed = response.data
             .filter(file => file.status === 'renamed')
             .map(file => file.filename);
-        exportVar(`${namespace}_FILES_CHANGED`, filesChanged);
-        exportVar(`${namespace}_FILES_ADDED`, filesAdded);
-        exportVar(`${namespace}_FILES_MODIFIED`, filesModified);
-        exportVar(`${namespace}_FILES_REMOVED`, filesRemoved);
-        exportVar(`${namespace}_FILES_RENAMED`, filesRenamed);
+        exportVar(`${prefix}_FILES_CHANGED`, filesChanged);
+        exportVar(`${prefix}_FILES_ADDED`, filesAdded);
+        exportVar(`${prefix}_FILES_MODIFIED`, filesModified);
+        exportVar(`${prefix}_FILES_REMOVED`, filesRemoved);
+        exportVar(`${prefix}_FILES_RENAMED`, filesRenamed);
+    });
+}
+function exportPushVariables(prefix, octokit) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const event = github.context.payload;
+        const namespace = `${prefix}_PUSH`;
+        // Export variables from context
+        exportVar(`${namespace}_REF`, event.ref);
+        exportVar(`${namespace}_BEFORE`, event.before);
+        exportVar(`${namespace}_AFTER`, event.after);
+        // Export variables from API
+        const response = yield octokit.rest.repos.compareCommits({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            base: event.before,
+            head: event.after
+        });
+        let filesChanged = '';
+        let filesAdded = '';
+        let filesModified = '';
+        let filesRemoved = '';
+        let filesRenamed = '';
+        if (response.data.files !== undefined) {
+            filesChanged = response.data.files.map(file => file.filename);
+            filesAdded = response.data.files
+                .filter(file => file.status === 'added')
+                .map(file => file.filename);
+            filesModified = response.data.files
+                .filter(file => file.status === 'modified')
+                .map(file => file.filename);
+            filesRemoved = response.data.files
+                .filter(file => file.status === 'removed')
+                .map(file => file.filename);
+            filesRenamed = response.data.files
+                .filter(file => file.status === 'renamed')
+                .map(file => file.filename);
+        }
+        exportVar(`${prefix}_FILES_CHANGED`, filesChanged);
+        exportVar(`${prefix}_FILES_ADDED`, filesAdded);
+        exportVar(`${prefix}_FILES_MODIFIED`, filesModified);
+        exportVar(`${prefix}_FILES_REMOVED`, filesRemoved);
+        exportVar(`${prefix}_FILES_RENAMED`, filesRenamed);
     });
 }
 function run() {
@@ -90,14 +132,23 @@ function run() {
         const token = core.getInput('token');
         const prefix = core.getInput('prefix');
         const octokit = github.getOctokit(token);
-        core.info(`Event name: ${github.context.eventName}`);
         // Export general variables
+        exportVar(`${prefix}_EVENT_NAME`, github.context.eventName);
+        exportVar(`${prefix}_SHA`, github.context.sha);
+        exportVar(`${prefix}_REF`, github.context.ref);
+        exportVar(`${prefix}_WORKFLOW`, github.context.workflow);
+        exportVar(`${prefix}_REPO_OWNER`, github.context.repo.owner);
+        exportVar(`${prefix}_REPO_REPO`, github.context.repo.repo);
         if (github.context.payload.action !== undefined) {
-            core.exportVariable(`${prefix}_ACTION`, github.context.payload.action);
+            exportVar(`${prefix}_PAYLOAD_ACTION`, github.context.payload.action);
         }
         // Export pull request related variables
         if (github.context.eventName === 'pull_request') {
             return yield exportPullRequestVariables(prefix, octokit);
+        }
+        // Export push related variables
+        if (github.context.eventName === 'push') {
+            return yield exportPushVariables(prefix, octokit);
         }
     });
 }
